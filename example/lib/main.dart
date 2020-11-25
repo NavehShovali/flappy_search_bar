@@ -48,6 +48,7 @@ class _HomeState extends State<Home> {
 
   @override
   Widget build(BuildContext context) {
+    final widthMax = MediaQuery.of(context).size.width;
     return Scaffold(
       body: SafeArea(
         child: SearchBar<Post>(
@@ -104,6 +105,12 @@ class _HomeState extends State<Home> {
               ),
             );
           },
+          trailingIcon: Container(
+            width: .15 * widthMax,
+            child: Center(
+              child: IconButton(icon: Icon(Icons.cake), onPressed: () {})
+            )
+          ),
         ),
       ),
     );

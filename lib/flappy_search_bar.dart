@@ -421,6 +421,7 @@ class _SearchBarState<T> extends State<SearchBar<T>>
                     ),
                   ),
                 ),
+                widget.trailingIcon != null ? widget.trailingIcon : Container(width: 0.0)
               ],
             ),
           ),
