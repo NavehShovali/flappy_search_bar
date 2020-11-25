@@ -200,6 +200,9 @@ class SearchBar<T> extends StatefulWidget {
   /// Set a padding on the list
   final EdgeInsetsGeometry listPadding;
 
+  /// Set a trailing icon for the header
+  final Widget trailingIcon;
+
   SearchBar({
     Key key,
     @required this.onSearch,
@@ -217,7 +220,7 @@ class SearchBar<T> extends StatefulWidget {
     this.hintStyle = const TextStyle(color: Color.fromRGBO(142, 142, 147, 1)),
     this.iconActiveColor = Colors.black,
     this.textStyle = const TextStyle(color: Colors.black),
-    this.cancellationWidget = const Text("Cancel"),
+    this.cancellationWidget = const Icon(Icons.cancel),
     this.onCancelled,
     this.suggestions = const [],
     this.buildSuggestion,
@@ -231,6 +234,7 @@ class SearchBar<T> extends StatefulWidget {
     this.listPadding = const EdgeInsets.all(0),
     this.searchBarPadding = const EdgeInsets.all(0),
     this.headerPadding = const EdgeInsets.all(0),
+    this.trailingIcon
   }) : super(key: key);
 
   @override
@@ -371,7 +375,7 @@ class _SearchBarState<T> extends State<SearchBar<T>>
                 Flexible(
                   child: AnimatedContainer(
                     duration: Duration(milliseconds: 200),
-                    width: _animate ? widthMax * .8 : widthMax,
+                    width: widget.trailingIcon != null ? .8 * widthMax : widthMax,
                     decoration: BoxDecoration(
                       borderRadius: widget.searchBarStyle.borderRadius,
                       color: widget.searchBarStyle.backgroundColor,
@@ -384,33 +388,34 @@ class _SearchBarState<T> extends State<SearchBar<T>>
                           onChanged: _onTextChanged,
                           style: widget.textStyle,
                           decoration: InputDecoration(
-                            icon: widget.icon,
+                            icon: Padding(
+                              padding: EdgeInsetsDirectional.only(start: 20.0),
+                              child: widget.icon
+                            ),
                             border: InputBorder.none,
                             hintText: widget.hintText,
                             hintStyle: widget.hintStyle,
+                            suffixIcon: GestureDetector(
+                              onTap: _cancel,
+                              child: AnimatedOpacity(
+                                opacity: _animate ? 1.0 : 0,
+                                curve: Curves.easeIn,
+                                duration: Duration(milliseconds: _animate ? 1000 : 0),
+                                child: AnimatedContainer(
+                                  duration: Duration(milliseconds: 200),
+                                  width:
+                                  _animate ? MediaQuery.of(context).size.width * .2 : 0,
+                                  child: Container(
+                                    color: Colors.transparent,
+                                    child: widget.cancellationWidget,
+                                  ),
+                                ),
+                              ),
+                            ),
                           ),
                         ),
                         data: Theme.of(context).copyWith(
                           primaryColor: widget.iconActiveColor,
-                        ),
-                      ),
-                    ),
-                  ),
-                ),
-                GestureDetector(
-                  onTap: _cancel,
-                  child: AnimatedOpacity(
-                    opacity: _animate ? 1.0 : 0,
-                    curve: Curves.easeIn,
-                    duration: Duration(milliseconds: _animate ? 1000 : 0),
-                    child: AnimatedContainer(
-                      duration: Duration(milliseconds: 200),
-                      width:
-                          _animate ? MediaQuery.of(context).size.width * .2 : 0,
-                      child: Container(
-                        color: Colors.transparent,
-                        child: Center(
-                          child: widget.cancellationWidget,
                         ),
                       ),
                     ),
