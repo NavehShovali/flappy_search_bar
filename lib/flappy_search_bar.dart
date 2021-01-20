@@ -215,16 +215,16 @@ class SearchBar<T> extends StatefulWidget {
     this.emptyWidget = const SizedBox.shrink(),
     this.header,
     this.placeHolder,
-    this.icon = const Icon(Icons.search),
+    this.icon = const Icon(Icons.search, color: Colors.black38,),
     this.hintText = "",
     this.hintStyle = const TextStyle(color: Color.fromRGBO(142, 142, 147, 1)),
     this.iconActiveColor = Colors.black,
     this.textStyle = const TextStyle(color: Colors.black),
-    this.cancellationWidget = const Icon(Icons.cancel),
+    this.cancellationWidget = const Icon(Icons.cancel, color: Colors.black45,),
     this.onCancelled,
     this.suggestions = const [],
     this.buildSuggestion,
-    this.searchBarStyle = const SearchBarStyle(),
+    SearchBarStyle searchBarStyle,
     this.crossAxisCount = 1,
     this.shrinkWrap = false,
     this.indexedScaledTileBuilder,
@@ -234,8 +234,8 @@ class SearchBar<T> extends StatefulWidget {
     this.listPadding = const EdgeInsets.all(0),
     this.searchBarPadding = const EdgeInsets.all(0),
     this.headerPadding = const EdgeInsets.all(0),
-    this.trailingIcon
-  }) : super(key: key);
+    this.trailingIcon,
+  }) : searchBarStyle = SearchBarStyle(), super(key: key);
 
   @override
   _SearchBarState createState() => _SearchBarState<T>();
@@ -379,6 +379,7 @@ class _SearchBarState<T> extends State<SearchBar<T>>
                     decoration: BoxDecoration(
                       borderRadius: widget.searchBarStyle.borderRadius,
                       color: widget.searchBarStyle.backgroundColor,
+                      border: widget.searchBarStyle.border,
                     ),
                     child: Padding(
                       padding: widget.searchBarStyle.padding,

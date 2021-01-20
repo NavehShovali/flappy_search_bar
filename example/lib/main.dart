@@ -106,10 +106,28 @@ class _HomeState extends State<Home> {
             );
           },
           trailingIcon: Container(
-            width: .15 * widthMax,
-            child: Center(
-              child: IconButton(icon: Icon(Icons.cake), onPressed: () {})
-            )
+            decoration: BoxDecoration(
+              gradient: LinearGradient(
+                colors: [Colors.purple, Colors.yellow],
+                begin: Alignment.topLeft,
+                end: Alignment.bottomRight,
+              ),
+              borderRadius: BorderRadius.only(topRight: Radius.circular(30.0), bottomRight: Radius.circular(30.0))
+            ),
+            child: Material(
+              color: Colors.transparent,
+              child: InkWell(
+                onTap: () {},
+                borderRadius: BorderRadius.only(topRight: Radius.circular(30.0), bottomRight: Radius.circular(30.0)),
+                child: Container(
+                  height: 50,
+                  width: .15 * widthMax,
+                  child: Center(
+                      child: Icon(Icons.filter_list_rounded),
+                  ),
+                ),
+              ),
+            ),
           ),
         ),
       ),
