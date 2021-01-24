@@ -206,6 +206,9 @@ class SearchBar<T> extends StatefulWidget {
   /// Ratio between text-field and trailing icon widths
   final double widthRatio;
 
+  /// Controller for the search-box's text field
+  final TextEditingController searchQueryController;
+
   SearchBar({
     Key key,
     @required this.onSearch,
@@ -239,6 +242,7 @@ class SearchBar<T> extends StatefulWidget {
     this.headerPadding = const EdgeInsets.all(0),
     this.trailingIcon,
     this.widthRatio = 0.8,
+    this.searchQueryController,
   }) : searchBarStyle = searchBarStyle ?? SearchBarStyle(), super(key: key);
 
   @override
@@ -249,7 +253,7 @@ class _SearchBarState<T> extends State<SearchBar<T>>
     with TickerProviderStateMixin, _ControllerListener<T> {
   bool _loading = false;
   Widget _error;
-  final _searchQueryController = TextEditingController();
+  TextEditingController _searchQueryController;
   Timer _debounce;
   bool _animate = false;
   List<T> _list = [];
@@ -260,7 +264,17 @@ class _SearchBarState<T> extends State<SearchBar<T>>
     super.initState();
     searchBarController =
         widget.searchBarController ?? SearchBarController<T>();
+    _searchQueryController =
+        widget.searchQueryController ?? TextEditingController();
     searchBarController.setListener(this);
+  }
+
+  @override
+  void dispose() {
+    if (widget.searchQueryController == null) {
+      _searchQueryController.dispose();
+    }
+    super.dispose();
   }
 
   @override
