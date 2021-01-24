@@ -203,6 +203,9 @@ class SearchBar<T> extends StatefulWidget {
   /// Set a trailing icon for the header
   final Widget trailingIcon;
 
+  /// Ratio between text-field and trailing icon widths
+  final double widthRatio;
+
   SearchBar({
     Key key,
     @required this.onSearch,
@@ -235,6 +238,7 @@ class SearchBar<T> extends StatefulWidget {
     this.searchBarPadding = const EdgeInsets.all(0),
     this.headerPadding = const EdgeInsets.all(0),
     this.trailingIcon,
+    this.widthRatio = 0.8,
   }) : searchBarStyle = SearchBarStyle(), super(key: key);
 
   @override
@@ -375,7 +379,7 @@ class _SearchBarState<T> extends State<SearchBar<T>>
                 Flexible(
                   child: AnimatedContainer(
                     duration: Duration(milliseconds: 200),
-                    width: widget.trailingIcon != null ? .8 * widthMax : widthMax,
+                    width: widget.trailingIcon != null ? widget.widthRatio * widthMax : widthMax,
                     decoration: BoxDecoration(
                       borderRadius: widget.searchBarStyle.borderRadius,
                       color: widget.searchBarStyle.backgroundColor,
