@@ -239,7 +239,7 @@ class SearchBar<T> extends StatefulWidget {
     this.headerPadding = const EdgeInsets.all(0),
     this.trailingIcon,
     this.widthRatio = 0.8,
-  }) : searchBarStyle = SearchBarStyle(), super(key: key);
+  }) : searchBarStyle = searchBarStyle ?? SearchBarStyle(), super(key: key);
 
   @override
   _SearchBarState createState() => _SearchBarState<T>();
