@@ -130,28 +130,32 @@ class _HomeState extends State<Home> {
             ),
           ),
           onHelp: () {
-            showModalBottomSheet(context: context, builder: (context) => Padding(
-              padding: EdgeInsets.all(20),
-              child: Material(
-                child: ListView(
-                  shrinkWrap: true,
-                  physics: ClampingScrollPhysics(),
-                  children: [
-                    Center(
-                      child: Container(
-                        margin: EdgeInsets.only(bottom: 10),
-                        width: .3 * widthMax,
-                        height: 6,
-                        decoration: BoxDecoration(
-                            color: Colors.black12,
-                            borderRadius: BorderRadius.circular(20.0)),
+            showModalBottomSheet(
+              context: context,
+              shape: RoundedRectangleBorder(borderRadius: BorderRadius.vertical(top: Radius.circular(20.0))),
+              builder: (context) => Padding(
+                padding: EdgeInsets.all(20),
+                child: Material(
+                  child: ListView(
+                    shrinkWrap: true,
+                    physics: ClampingScrollPhysics(),
+                    children: [
+                      Center(
+                        child: Container(
+                          margin: EdgeInsets.only(bottom: 10),
+                          width: .3 * widthMax,
+                          height: 6,
+                          decoration: BoxDecoration(
+                              color: Colors.black12,
+                              borderRadius: BorderRadius.circular(20.0)),
+                        ),
                       ),
-                    ),
-                    Text('BBOOOOLboollll :)'),
-                  ],
+                      Text('BBOOOOLboollll :)'),
+                    ],
+                  ),
                 ),
               ),
-            ));
+            );
           },
         ),
       ),
