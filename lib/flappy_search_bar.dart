@@ -206,6 +206,9 @@ class SearchBar<T> extends StatefulWidget {
   /// A function triggered upon tapping the help button
   final VoidCallback onHelp;
 
+  /// Optional focus node for the search bar
+  final FocusNode textFieldFocusNode;
+
   SearchBar({
     Key key,
     @required this.onSearch,
@@ -239,6 +242,7 @@ class SearchBar<T> extends StatefulWidget {
     this.headerPadding = const EdgeInsets.all(0),
     this.trailingIcon,
     this.onHelp,
+    this.textFieldFocusNode,
   }) : super(key: key);
 
   @override
@@ -254,11 +258,12 @@ class _SearchBarState<T> extends State<SearchBar<T>>
   bool _animate = false;
   List<T> _list = [];
   SearchBarController searchBarController;
-  FocusNode _focusNode = FocusNode();
+  FocusNode _focusNode;
 
   @override
   void initState() {
     super.initState();
+    _focusNode = widget.textFieldFocusNode ?? FocusNode();
     searchBarController =
         widget.searchBarController ?? SearchBarController<T>();
     searchBarController.setListener(this);
@@ -331,19 +336,25 @@ class _SearchBarState<T> extends State<SearchBar<T>>
       List<T> items, Widget Function(T item, int index) builder) {
     return Padding(
       padding: widget.listPadding,
-      child: StaggeredGridView.countBuilder(
-        crossAxisCount: widget.crossAxisCount,
-        itemCount: items.length,
-        shrinkWrap: widget.shrinkWrap,
-        staggeredTileBuilder:
-            widget.indexedScaledTileBuilder ?? (int index) => ScaledTile.fit(1),
-        scrollDirection: widget.scrollDirection,
-        mainAxisSpacing: widget.mainAxisSpacing,
-        crossAxisSpacing: widget.crossAxisSpacing,
-        addAutomaticKeepAlives: true,
-        itemBuilder: (BuildContext context, int index) {
-          return builder(items[index], index);
+      child: GestureDetector(
+        behavior: HitTestBehavior.opaque,
+        onPanDown: (_) {
+          FocusScope.of(context).requestFocus(FocusNode());
         },
+        child: StaggeredGridView.countBuilder(
+          crossAxisCount: widget.crossAxisCount,
+          itemCount: items.length,
+          shrinkWrap: widget.shrinkWrap,
+          staggeredTileBuilder:
+              widget.indexedScaledTileBuilder ?? (int index) => ScaledTile.fit(1),
+          scrollDirection: widget.scrollDirection,
+          mainAxisSpacing: widget.mainAxisSpacing,
+          crossAxisSpacing: widget.crossAxisSpacing,
+          addAutomaticKeepAlives: true,
+          itemBuilder: (BuildContext context, int index) {
+            return builder(items[index], index);
+          },
+        ),
       ),
     );
   }
@@ -354,7 +365,15 @@ class _SearchBarState<T> extends State<SearchBar<T>>
     } else if (_loading) {
       return widget.loader;
     } else if (_searchQueryController.text.length < widget.minimumChars) {
-      if (widget.placeHolder != null) return widget.placeHolder;
+      if (widget.placeHolder != null) {
+        return GestureDetector(
+          behavior: HitTestBehavior.opaque,
+          onPanDown: (_) {
+            FocusScope.of(context).requestFocus(FocusNode());
+          },
+          child: widget.placeHolder,
+        );
+      }
       return _buildListView(
           widget.suggestions, widget.buildSuggestion ?? widget.onItemFound);
     } else if (_list.isNotEmpty) {
@@ -409,6 +428,7 @@ class _SearchBarState<T> extends State<SearchBar<T>>
                       padding: widget.searchBarStyle.padding,
                       child: Theme(
                         child: TextField(
+                          focusNode: _focusNode,
                           controller: _searchQueryController,
                           onChanged: _onTextChanged,
                           style: widget.textStyle,
@@ -425,6 +445,7 @@ class _SearchBarState<T> extends State<SearchBar<T>>
                               child: Material(
                                 color: Colors.transparent,
                                 child: InkWell(
+                                  customBorder: CircleBorder(),
                                   onTap: widget.onHelp != null
                                       ? (_animate ? _cancel : () {
                                     _focusNode.unfocus();

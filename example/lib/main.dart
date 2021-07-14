@@ -111,6 +111,34 @@ class _HomeState extends State<Home> {
               child: IconButton(icon: Icon(Icons.cake), onPressed: () {})
             )
           ),
+          onHelp: () {
+            showModalBottomSheet(
+              context: context,
+              shape: RoundedRectangleBorder(borderRadius: BorderRadius.vertical(top: Radius.circular(20.0))),
+              builder: (context) => Padding(
+                padding: EdgeInsets.all(20),
+                child: Material(
+                  child: ListView(
+                    shrinkWrap: true,
+                    physics: ClampingScrollPhysics(),
+                    children: [
+                      Center(
+                        child: Container(
+                          margin: EdgeInsets.only(bottom: 10),
+                          width: .3 * MediaQuery.of(context).size.width,
+                          height: 6,
+                          decoration: BoxDecoration(
+                              color: Colors.black12,
+                              borderRadius: BorderRadius.circular(20.0)),
+                        ),
+                      ),
+                      Text('Lorem ipsumush'),
+                    ],
+                  ),
+                ),
+              ),
+            );
+          },
         ),
       ),
     );
