@@ -203,6 +203,9 @@ class SearchBar<T> extends StatefulWidget {
   /// Set a trailing icon for the header
   final Widget trailingIcon;
 
+  /// A function triggered upon tapping the help button
+  final VoidCallback onHelp;
+
   SearchBar({
     Key key,
     @required this.onSearch,
@@ -234,7 +237,8 @@ class SearchBar<T> extends StatefulWidget {
     this.listPadding = const EdgeInsets.all(0),
     this.searchBarPadding = const EdgeInsets.all(0),
     this.headerPadding = const EdgeInsets.all(0),
-    this.trailingIcon
+    this.trailingIcon,
+    this.onHelp,
   }) : super(key: key);
 
   @override
@@ -250,6 +254,7 @@ class _SearchBarState<T> extends State<SearchBar<T>>
   bool _animate = false;
   List<T> _list = [];
   SearchBarController searchBarController;
+  FocusNode _focusNode = FocusNode();
 
   @override
   void initState() {
@@ -362,6 +367,26 @@ class _SearchBarState<T> extends State<SearchBar<T>>
   @override
   Widget build(BuildContext context) {
     final widthMax = MediaQuery.of(context).size.width;
+    var _suffixWidget;
+
+    if (_animate) {
+      _suffixWidget = Container(
+        key: ValueKey<int>(0),
+        width: MediaQuery.of(context).size.width * .2,
+        color: Colors.transparent,
+        child: widget.cancellationWidget,
+      );
+    } else if (widget.onHelp != null) {
+      _suffixWidget = Container(
+        key: ValueKey<int>(1),
+        width: widget.onHelp != null ? MediaQuery.of(context).size.width * .2 : 0,
+        color: Colors.transparent,
+        child: widget.onHelp != null ? Icon(Icons.help_outline_rounded, color: Colors.black45) : null,
+      );
+    } else {
+      _suffixWidget = Container(height: 0, width: 0);
+    }
+
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: <Widget>[
@@ -395,19 +420,35 @@ class _SearchBarState<T> extends State<SearchBar<T>>
                             border: InputBorder.none,
                             hintText: widget.hintText,
                             hintStyle: widget.hintStyle,
-                            suffixIcon: GestureDetector(
-                              onTap: _cancel,
-                              child: AnimatedOpacity(
-                                opacity: _animate ? 1.0 : 0,
-                                curve: Curves.easeIn,
-                                duration: Duration(milliseconds: _animate ? 1000 : 0),
-                                child: AnimatedContainer(
-                                  duration: Duration(milliseconds: 200),
-                                  width:
-                                  _animate ? MediaQuery.of(context).size.width * .2 : 0,
-                                  child: Container(
-                                    color: Colors.transparent,
-                                    child: widget.cancellationWidget,
+                            suffixIcon: Container(
+                              constraints: BoxConstraints(maxHeight: 80),
+                              child: Material(
+                                color: Colors.transparent,
+                                child: InkWell(
+                                  onTap: widget.onHelp != null
+                                      ? (_animate ? _cancel : () {
+                                    _focusNode.unfocus();
+                                    _focusNode.canRequestFocus = false;
+                                    widget.onHelp();
+                                    _focusNode.canRequestFocus = true;
+                                  }) : _cancel,
+                                  // child: AnimatedOpacity(
+                                  //   opacity: _animate ? 1.0 : 0,
+                                  //   curve: Curves.easeIn,
+                                  //   duration: Duration(milliseconds: _animate ? 1000 : 0),
+                                  //   child: AnimatedContainer(
+                                  //     duration: Duration(milliseconds: 200),
+                                  //     width:
+                                  //     _animate ? MediaQuery.of(context).size.width * .2 : 0,
+                                  //     child: Container(
+                                  //       color: Colors.transparent,
+                                  //       child: widget.cancellationWidget,
+                                  //     ),
+                                  //   ),
+                                  // ),
+                                  child: AnimatedSwitcher(
+                                    duration: Duration(milliseconds: 200),
+                                    child: _suffixWidget,
                                   ),
                                 ),
                               ),
