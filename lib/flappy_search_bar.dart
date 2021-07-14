@@ -209,6 +209,9 @@ class SearchBar<T> extends StatefulWidget {
   /// Controller for the search-box's text field
   final TextEditingController searchQueryController;
 
+  /// A function triggered upon tapping the help button
+  final VoidCallback onHelp;
+
   SearchBar({
     Key key,
     @required this.onSearch,
@@ -243,6 +246,7 @@ class SearchBar<T> extends StatefulWidget {
     this.trailingIcon,
     this.widthRatio = 0.8,
     this.searchQueryController,
+    this.onHelp,
   }) : searchBarStyle = searchBarStyle ?? SearchBarStyle(), super(key: key);
 
   @override
@@ -380,6 +384,23 @@ class _SearchBarState<T> extends State<SearchBar<T>>
   @override
   Widget build(BuildContext context) {
     final widthMax = MediaQuery.of(context).size.width;
+    var _suffixWidget;
+
+    if (_animate) {
+      _suffixWidget = Container(
+        key: ValueKey<int>(0),
+        width: MediaQuery.of(context).size.width * .2,
+        color: Colors.transparent,
+        child: widget.cancellationWidget,
+      );
+    } else {
+      _suffixWidget = Container(
+        key: ValueKey<int>(1),
+        width: widget.onHelp != null ? MediaQuery.of(context).size.width * .2 : 0,
+        color: Colors.transparent,
+        child: widget.onHelp != null ? Icon(Icons.help_outline_rounded, color: Colors.black45) : null,
+      );
+    }
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: <Widget>[
@@ -415,20 +436,26 @@ class _SearchBarState<T> extends State<SearchBar<T>>
                             hintText: widget.hintText,
                             hintStyle: widget.hintStyle,
                             suffixIcon: GestureDetector(
-                              onTap: _cancel,
-                              child: AnimatedOpacity(
-                                opacity: _animate ? 1.0 : 0,
-                                curve: Curves.easeIn,
-                                duration: Duration(milliseconds: _animate ? 1000 : 0),
-                                child: AnimatedContainer(
-                                  duration: Duration(milliseconds: 200),
-                                  width:
-                                  _animate ? MediaQuery.of(context).size.width * .2 : 0,
-                                  child: Container(
-                                    color: Colors.transparent,
-                                    child: widget.cancellationWidget,
-                                  ),
-                                ),
+                              onTap: widget.onHelp != null
+                                  ? (_animate ? _cancel : widget.onHelp)
+                                  : _cancel,
+                              // child: AnimatedOpacity(
+                              //   opacity: _animate ? 1.0 : 0,
+                              //   curve: Curves.easeIn,
+                              //   duration: Duration(milliseconds: _animate ? 1000 : 0),
+                              //   child: AnimatedContainer(
+                              //     duration: Duration(milliseconds: 200),
+                              //     width:
+                              //     _animate ? MediaQuery.of(context).size.width * .2 : 0,
+                              //     child: Container(
+                              //       color: Colors.transparent,
+                              //       child: widget.cancellationWidget,
+                              //     ),
+                              //   ),
+                              // ),
+                              child: AnimatedSwitcher(
+                                duration: Duration(milliseconds: 200),
+                                child: _suffixWidget,
                               ),
                             ),
                           ),
