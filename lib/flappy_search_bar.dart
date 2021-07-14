@@ -262,6 +262,7 @@ class _SearchBarState<T> extends State<SearchBar<T>>
   bool _animate = false;
   List<T> _list = [];
   SearchBarController searchBarController;
+  FocusNode _focusNode = FocusNode();
 
   @override
   void initState() {
@@ -408,6 +409,7 @@ class _SearchBarState<T> extends State<SearchBar<T>>
           padding: widget.searchBarPadding,
           child: Container(
             height: 80,
+            constraints: BoxConstraints(maxHeight: 80),
             child: Row(
               mainAxisAlignment: MainAxisAlignment.start,
               children: <Widget>[
@@ -424,6 +426,7 @@ class _SearchBarState<T> extends State<SearchBar<T>>
                       padding: widget.searchBarStyle.padding,
                       child: Theme(
                         child: TextField(
+                          focusNode: _focusNode,
                           controller: _searchQueryController,
                           onChanged: _onTextChanged,
                           style: widget.textStyle,
@@ -435,27 +438,33 @@ class _SearchBarState<T> extends State<SearchBar<T>>
                             border: InputBorder.none,
                             hintText: widget.hintText,
                             hintStyle: widget.hintStyle,
-                            suffixIcon: GestureDetector(
-                              onTap: widget.onHelp != null
-                                  ? (_animate ? _cancel : widget.onHelp)
-                                  : _cancel,
-                              // child: AnimatedOpacity(
-                              //   opacity: _animate ? 1.0 : 0,
-                              //   curve: Curves.easeIn,
-                              //   duration: Duration(milliseconds: _animate ? 1000 : 0),
-                              //   child: AnimatedContainer(
-                              //     duration: Duration(milliseconds: 200),
-                              //     width:
-                              //     _animate ? MediaQuery.of(context).size.width * .2 : 0,
-                              //     child: Container(
-                              //       color: Colors.transparent,
-                              //       child: widget.cancellationWidget,
-                              //     ),
-                              //   ),
-                              // ),
-                              child: AnimatedSwitcher(
-                                duration: Duration(milliseconds: 200),
-                                child: _suffixWidget,
+                            suffixIcon: Material(
+                              child: InkWell(
+                                onTap: widget.onHelp != null
+                                    ? (_animate ? _cancel : () {
+                                      _focusNode.unfocus();
+                                      _focusNode.canRequestFocus = false;
+                                      widget.onHelp();
+                                      _focusNode.canRequestFocus = true;
+                                }) : _cancel,
+                                // child: AnimatedOpacity(
+                                //   opacity: _animate ? 1.0 : 0,
+                                //   curve: Curves.easeIn,
+                                //   duration: Duration(milliseconds: _animate ? 1000 : 0),
+                                //   child: AnimatedContainer(
+                                //     duration: Duration(milliseconds: 200),
+                                //     width:
+                                //     _animate ? MediaQuery.of(context).size.width * .2 : 0,
+                                //     child: Container(
+                                //       color: Colors.transparent,
+                                //       child: widget.cancellationWidget,
+                                //     ),
+                                //   ),
+                                // ),
+                                child: AnimatedSwitcher(
+                                  duration: Duration(milliseconds: 200),
+                                  child: _suffixWidget,
+                                ),
                               ),
                             ),
                           ),
