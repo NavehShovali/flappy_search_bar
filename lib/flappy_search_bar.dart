@@ -209,6 +209,9 @@ class SearchBar<T> extends StatefulWidget {
   /// Optional focus node for the search bar
   final FocusNode textFieldFocusNode;
 
+  /// Optional non-default hintWidget
+  final Widget hintWidget;
+
   SearchBar({
     Key key,
     @required this.onSearch,
@@ -243,6 +246,7 @@ class SearchBar<T> extends StatefulWidget {
     this.trailingIcon,
     this.onHelp,
     this.textFieldFocusNode,
+    this.hintWidget = const Icon(Icons.help_outline_rounded),
   }) : super(key: key);
 
   @override
@@ -400,7 +404,7 @@ class _SearchBarState<T> extends State<SearchBar<T>>
         key: ValueKey<int>(1),
         width: widget.onHelp != null ? MediaQuery.of(context).size.width * .2 : 0,
         color: Colors.transparent,
-        child: widget.onHelp != null ? Icon(Icons.help_outline_rounded, color: Colors.black45) : null,
+        child: widget.onHelp != null ? widget.hintWidget : null,
       );
     } else {
       _suffixWidget = Container(height: 0, width: 0);
@@ -427,55 +431,95 @@ class _SearchBarState<T> extends State<SearchBar<T>>
                     child: Padding(
                       padding: widget.searchBarStyle.padding,
                       child: Theme(
-                        child: TextField(
-                          focusNode: _focusNode,
-                          controller: _searchQueryController,
-                          onChanged: _onTextChanged,
-                          style: widget.textStyle,
-                          decoration: InputDecoration(
-                            icon: Padding(
-                              padding: EdgeInsetsDirectional.only(start: 20.0),
-                              child: widget.icon
+                        child: Stack(alignment: AlignmentDirectional.centerEnd, children: [
+                          Container(
+                            height: 40,
+                            padding: EdgeInsetsDirectional.only(end: 60),
+                            child: TextField(
+                              focusNode: _focusNode,
+                              controller: _searchQueryController,
+                              onChanged: _onTextChanged,
+                              style: widget.textStyle,
+                              decoration: InputDecoration(
+                                icon: Padding(
+                                  padding: EdgeInsetsDirectional.only(start: 20.0),
+                                  child: widget.icon
+                                ),
+                                border: InputBorder.none,
+                                hintText: widget.hintText,
+                                hintStyle: widget.hintStyle,
+                                // suffixIcon: Container(
+                                //   constraints: BoxConstraints(maxHeight: 80),
+                                //   child: Material(
+                                //     color: Colors.transparent,
+                                //     child: InkWell(
+                                //       customBorder: CircleBorder(),
+                                //       onTap: widget.onHelp != null
+                                //           ? (_animate ? _cancel : () {
+                                //         _focusNode.unfocus();
+                                //         _focusNode.canRequestFocus = false;
+                                //         widget.onHelp();
+                                //         _focusNode.canRequestFocus = true;
+                                //       }) : _cancel,
+                                //       // child: AnimatedOpacity(
+                                //       //   opacity: _animate ? 1.0 : 0,
+                                //       //   curve: Curves.easeIn,
+                                //       //   duration: Duration(milliseconds: _animate ? 1000 : 0),
+                                //       //   child: AnimatedContainer(
+                                //       //     duration: Duration(milliseconds: 200),
+                                //       //     width:
+                                //       //     _animate ? MediaQuery.of(context).size.width * .2 : 0,
+                                //       //     child: Container(
+                                //       //       color: Colors.transparent,
+                                //       //       child: widget.cancellationWidget,
+                                //       //     ),
+                                //       //   ),
+                                //       // ),
+                                //       child: AnimatedSwitcher(
+                                //         duration: Duration(milliseconds: 200),
+                                //         child: _suffixWidget,
+                                //       ),
+                                //     ),
+                                //   ),
+                                // ),
+                              ),
                             ),
-                            border: InputBorder.none,
-                            hintText: widget.hintText,
-                            hintStyle: widget.hintStyle,
-                            suffixIcon: Container(
-                              constraints: BoxConstraints(maxHeight: 80),
-                              child: Material(
-                                color: Colors.transparent,
-                                child: InkWell(
-                                  customBorder: CircleBorder(),
-                                  onTap: widget.onHelp != null
-                                      ? (_animate ? _cancel : () {
-                                    _focusNode.unfocus();
-                                    _focusNode.canRequestFocus = false;
-                                    widget.onHelp();
-                                    _focusNode.canRequestFocus = true;
-                                  }) : _cancel,
-                                  // child: AnimatedOpacity(
-                                  //   opacity: _animate ? 1.0 : 0,
-                                  //   curve: Curves.easeIn,
-                                  //   duration: Duration(milliseconds: _animate ? 1000 : 0),
-                                  //   child: AnimatedContainer(
-                                  //     duration: Duration(milliseconds: 200),
-                                  //     width:
-                                  //     _animate ? MediaQuery.of(context).size.width * .2 : 0,
-                                  //     child: Container(
-                                  //       color: Colors.transparent,
-                                  //       child: widget.cancellationWidget,
-                                  //     ),
-                                  //   ),
-                                  // ),
-                                  child: AnimatedSwitcher(
-                                    duration: Duration(milliseconds: 200),
-                                    child: _suffixWidget,
-                                  ),
+                          ),
+                          Container(
+                            constraints: BoxConstraints(maxHeight: 80),
+                            child: Material(
+                              color: Colors.transparent,
+                              child: InkWell(
+                                customBorder: CircleBorder(),
+                                onTap: widget.onHelp != null
+                                    ? (_animate ? _cancel : () {
+                                  _focusNode.unfocus();
+                                  _focusNode.canRequestFocus = false;
+                                  widget.onHelp();
+                                  _focusNode.canRequestFocus = true;
+                                }) : _cancel,
+                                // child: AnimatedOpacity(
+                                //   opacity: _animate ? 1.0 : 0,
+                                //   curve: Curves.easeIn,
+                                //   duration: Duration(milliseconds: _animate ? 1000 : 0),
+                                //   child: AnimatedContainer(
+                                //     duration: Duration(milliseconds: 200),
+                                //     width:
+                                //     _animate ? MediaQuery.of(context).size.width * .2 : 0,
+                                //     child: Container(
+                                //       color: Colors.transparent,
+                                //       child: widget.cancellationWidget,
+                                //     ),
+                                //   ),
+                                // ),
+                                child: AnimatedSwitcher(
+                                  duration: Duration(milliseconds: 200),
+                                  child: _suffixWidget,
                                 ),
                               ),
                             ),
                           ),
-                        ),
+                        ]),
                         data: Theme.of(context).copyWith(
                           primaryColor: widget.iconActiveColor,
                         ),
