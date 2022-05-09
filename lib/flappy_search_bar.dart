@@ -212,6 +212,15 @@ class SearchBar<T> extends StatefulWidget {
   /// Optional non-default hintWidget
   final Widget hintWidget;
 
+  /// Optional text field cursor height
+  final double cursorHeight;
+
+  /// Optional height, defaults to 80
+  final double height;
+
+  /// Optional text field height, defaults to 40
+  final double textFieldHeight;
+
   SearchBar({
     Key key,
     @required this.onSearch,
@@ -247,6 +256,9 @@ class SearchBar<T> extends StatefulWidget {
     this.onHelp,
     this.textFieldFocusNode,
     this.hintWidget = const Icon(Icons.help_outline_rounded),
+    this.cursorHeight,
+    this.height = 80.0,
+    this.textFieldHeight = 40.0,
   }) : super(key: key);
 
   @override
@@ -416,7 +428,7 @@ class _SearchBarState<T> extends State<SearchBar<T>>
         Padding(
           padding: widget.searchBarPadding,
           child: Container(
-            height: 80,
+            height: widget.height,
             child: Row(
               mainAxisAlignment: MainAxisAlignment.start,
               children: <Widget>[
@@ -433,13 +445,14 @@ class _SearchBarState<T> extends State<SearchBar<T>>
                       child: Theme(
                         child: Stack(alignment: AlignmentDirectional.centerEnd, children: [
                           Container(
-                            height: 40,
+                            height: widget.textFieldHeight,
                             padding: EdgeInsetsDirectional.only(end: 60),
                             child: TextField(
                               focusNode: _focusNode,
                               controller: _searchQueryController,
                               onChanged: _onTextChanged,
                               style: widget.textStyle,
+                              cursorHeight: widget.cursorHeight,
                               decoration: InputDecoration(
                                 icon: Padding(
                                   padding: EdgeInsetsDirectional.only(start: 20.0),
@@ -486,7 +499,7 @@ class _SearchBarState<T> extends State<SearchBar<T>>
                             ),
                           ),
                           Container(
-                            constraints: BoxConstraints(maxHeight: 80),
+                            constraints: BoxConstraints(maxHeight: widget.height),
                             child: Material(
                               color: Colors.transparent,
                               child: InkWell(
