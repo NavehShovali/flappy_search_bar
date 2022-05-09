@@ -48,6 +48,7 @@ class _HomeState extends State<Home> {
 
   @override
   Widget build(BuildContext context) {
+    final widthMax = MediaQuery.of(context).size.width;
     return Scaffold(
       body: SafeArea(
         child: SearchBar<Post>(
@@ -57,7 +58,7 @@ class _HomeState extends State<Home> {
           onSearch: _getALlPosts,
           searchBarController: _searchBarController,
           placeHolder: Text("placeholder"),
-          cancellationWidget: Text("Cancel"),
+          // cancellationWidget: Text("Cancel"),
           emptyWidget: Text("empty"),
           indexedScaledTileBuilder: (int index) => ScaledTile.count(1, index.isEven ? 2 : 1),
           header: Row(
@@ -101,6 +102,40 @@ class _HomeState extends State<Home> {
                 onTap: () {
                   Navigator.of(context).push(MaterialPageRoute(builder: (context) => Detail()));
                 },
+              ),
+            );
+          },
+          trailingIcon: Container(
+            width: .15 * widthMax,
+            child: Center(
+              child: IconButton(icon: Icon(Icons.cake), onPressed: () {})
+            )
+          ),
+          onHelp: () {
+            showModalBottomSheet(
+              context: context,
+              shape: RoundedRectangleBorder(borderRadius: BorderRadius.vertical(top: Radius.circular(20.0))),
+              builder: (context) => Padding(
+                padding: EdgeInsets.all(20),
+                child: Material(
+                  child: ListView(
+                    shrinkWrap: true,
+                    physics: ClampingScrollPhysics(),
+                    children: [
+                      Center(
+                        child: Container(
+                          margin: EdgeInsets.only(bottom: 10),
+                          width: .3 * MediaQuery.of(context).size.width,
+                          height: 6,
+                          decoration: BoxDecoration(
+                              color: Colors.black12,
+                              borderRadius: BorderRadius.circular(20.0)),
+                        ),
+                      ),
+                      Text('Lorem ipsumush'),
+                    ],
+                  ),
+                ),
               ),
             );
           },

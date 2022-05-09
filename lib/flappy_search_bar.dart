@@ -200,6 +200,27 @@ class SearchBar<T> extends StatefulWidget {
   /// Set a padding on the list
   final EdgeInsetsGeometry listPadding;
 
+  /// Set a trailing icon for the header
+  final Widget trailingIcon;
+
+  /// A function triggered upon tapping the help button
+  final VoidCallback onHelp;
+
+  /// Optional focus node for the search bar
+  final FocusNode textFieldFocusNode;
+
+  /// Optional non-default hintWidget
+  final Widget hintWidget;
+
+  /// Optional text field cursor height
+  final double cursorHeight;
+
+  /// Optional height, defaults to 80
+  final double height;
+
+  /// Optional text field height, defaults to 40
+  final double textFieldHeight;
+
   SearchBar({
     Key key,
     @required this.onSearch,
@@ -217,7 +238,7 @@ class SearchBar<T> extends StatefulWidget {
     this.hintStyle = const TextStyle(color: Color.fromRGBO(142, 142, 147, 1)),
     this.iconActiveColor = Colors.black,
     this.textStyle = const TextStyle(color: Colors.black),
-    this.cancellationWidget = const Text("Cancel"),
+    this.cancellationWidget = const Icon(Icons.cancel),
     this.onCancelled,
     this.suggestions = const [],
     this.buildSuggestion,
@@ -231,6 +252,13 @@ class SearchBar<T> extends StatefulWidget {
     this.listPadding = const EdgeInsets.all(0),
     this.searchBarPadding = const EdgeInsets.all(0),
     this.headerPadding = const EdgeInsets.all(0),
+    this.trailingIcon,
+    this.onHelp,
+    this.textFieldFocusNode,
+    this.hintWidget = const Icon(Icons.help_outline_rounded),
+    this.cursorHeight,
+    this.height = 80.0,
+    this.textFieldHeight = 40.0,
   }) : super(key: key);
 
   @override
@@ -246,10 +274,12 @@ class _SearchBarState<T> extends State<SearchBar<T>>
   bool _animate = false;
   List<T> _list = [];
   SearchBarController searchBarController;
+  FocusNode _focusNode;
 
   @override
   void initState() {
     super.initState();
+    _focusNode = widget.textFieldFocusNode ?? FocusNode();
     searchBarController =
         widget.searchBarController ?? SearchBarController<T>();
     searchBarController.setListener(this);
@@ -322,19 +352,25 @@ class _SearchBarState<T> extends State<SearchBar<T>>
       List<T> items, Widget Function(T item, int index) builder) {
     return Padding(
       padding: widget.listPadding,
-      child: StaggeredGridView.countBuilder(
-        crossAxisCount: widget.crossAxisCount,
-        itemCount: items.length,
-        shrinkWrap: widget.shrinkWrap,
-        staggeredTileBuilder:
-            widget.indexedScaledTileBuilder ?? (int index) => ScaledTile.fit(1),
-        scrollDirection: widget.scrollDirection,
-        mainAxisSpacing: widget.mainAxisSpacing,
-        crossAxisSpacing: widget.crossAxisSpacing,
-        addAutomaticKeepAlives: true,
-        itemBuilder: (BuildContext context, int index) {
-          return builder(items[index], index);
+      child: GestureDetector(
+        behavior: HitTestBehavior.opaque,
+        onPanDown: (_) {
+          FocusScope.of(context).requestFocus(FocusNode());
         },
+        child: StaggeredGridView.countBuilder(
+          crossAxisCount: widget.crossAxisCount,
+          itemCount: items.length,
+          shrinkWrap: widget.shrinkWrap,
+          staggeredTileBuilder:
+              widget.indexedScaledTileBuilder ?? (int index) => ScaledTile.fit(1),
+          scrollDirection: widget.scrollDirection,
+          mainAxisSpacing: widget.mainAxisSpacing,
+          crossAxisSpacing: widget.crossAxisSpacing,
+          addAutomaticKeepAlives: true,
+          itemBuilder: (BuildContext context, int index) {
+            return builder(items[index], index);
+          },
+        ),
       ),
     );
   }
@@ -345,7 +381,15 @@ class _SearchBarState<T> extends State<SearchBar<T>>
     } else if (_loading) {
       return widget.loader;
     } else if (_searchQueryController.text.length < widget.minimumChars) {
-      if (widget.placeHolder != null) return widget.placeHolder;
+      if (widget.placeHolder != null) {
+        return GestureDetector(
+          behavior: HitTestBehavior.opaque,
+          onPanDown: (_) {
+            FocusScope.of(context).requestFocus(FocusNode());
+          },
+          child: widget.placeHolder,
+        );
+      }
       return _buildListView(
           widget.suggestions, widget.buildSuggestion ?? widget.onItemFound);
     } else if (_list.isNotEmpty) {
@@ -358,20 +402,40 @@ class _SearchBarState<T> extends State<SearchBar<T>>
   @override
   Widget build(BuildContext context) {
     final widthMax = MediaQuery.of(context).size.width;
+    var _suffixWidget;
+
+    if (_animate) {
+      _suffixWidget = Container(
+        key: ValueKey<int>(0),
+        width: MediaQuery.of(context).size.width * .2,
+        color: Colors.transparent,
+        child: widget.cancellationWidget,
+      );
+    } else if (widget.onHelp != null) {
+      _suffixWidget = Container(
+        key: ValueKey<int>(1),
+        width: widget.onHelp != null ? MediaQuery.of(context).size.width * .2 : 0,
+        color: Colors.transparent,
+        child: widget.onHelp != null ? widget.hintWidget : null,
+      );
+    } else {
+      _suffixWidget = Container(height: 0, width: 0);
+    }
+
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: <Widget>[
         Padding(
           padding: widget.searchBarPadding,
           child: Container(
-            height: 80,
+            height: widget.height,
             child: Row(
               mainAxisAlignment: MainAxisAlignment.start,
               children: <Widget>[
                 Flexible(
                   child: AnimatedContainer(
                     duration: Duration(milliseconds: 200),
-                    width: _animate ? widthMax * .8 : widthMax,
+                    width: widget.trailingIcon != null ? .8 * widthMax : widthMax,
                     decoration: BoxDecoration(
                       borderRadius: widget.searchBarStyle.borderRadius,
                       color: widget.searchBarStyle.backgroundColor,
@@ -379,17 +443,96 @@ class _SearchBarState<T> extends State<SearchBar<T>>
                     child: Padding(
                       padding: widget.searchBarStyle.padding,
                       child: Theme(
-                        child: TextField(
-                          controller: _searchQueryController,
-                          onChanged: _onTextChanged,
-                          style: widget.textStyle,
-                          decoration: InputDecoration(
-                            icon: widget.icon,
-                            border: InputBorder.none,
-                            hintText: widget.hintText,
-                            hintStyle: widget.hintStyle,
+                        child: Stack(alignment: AlignmentDirectional.centerEnd, children: [
+                          Container(
+                            height: widget.textFieldHeight,
+                            padding: EdgeInsetsDirectional.only(end: 60),
+                            child: TextField(
+                              focusNode: _focusNode,
+                              controller: _searchQueryController,
+                              onChanged: _onTextChanged,
+                              style: widget.textStyle,
+                              cursorHeight: widget.cursorHeight,
+                              decoration: InputDecoration(
+                                icon: Padding(
+                                  padding: EdgeInsetsDirectional.only(start: 20.0),
+                                  child: widget.icon
+                                ),
+                                border: InputBorder.none,
+                                hintText: widget.hintText,
+                                hintStyle: widget.hintStyle,
+                                // suffixIcon: Container(
+                                //   constraints: BoxConstraints(maxHeight: 80),
+                                //   child: Material(
+                                //     color: Colors.transparent,
+                                //     child: InkWell(
+                                //       customBorder: CircleBorder(),
+                                //       onTap: widget.onHelp != null
+                                //           ? (_animate ? _cancel : () {
+                                //         _focusNode.unfocus();
+                                //         _focusNode.canRequestFocus = false;
+                                //         widget.onHelp();
+                                //         _focusNode.canRequestFocus = true;
+                                //       }) : _cancel,
+                                //       // child: AnimatedOpacity(
+                                //       //   opacity: _animate ? 1.0 : 0,
+                                //       //   curve: Curves.easeIn,
+                                //       //   duration: Duration(milliseconds: _animate ? 1000 : 0),
+                                //       //   child: AnimatedContainer(
+                                //       //     duration: Duration(milliseconds: 200),
+                                //       //     width:
+                                //       //     _animate ? MediaQuery.of(context).size.width * .2 : 0,
+                                //       //     child: Container(
+                                //       //       color: Colors.transparent,
+                                //       //       child: widget.cancellationWidget,
+                                //       //     ),
+                                //       //   ),
+                                //       // ),
+                                //       child: AnimatedSwitcher(
+                                //         duration: Duration(milliseconds: 200),
+                                //         child: _suffixWidget,
+                                //       ),
+                                //     ),
+                                //   ),
+                                // ),
+                              ),
+                            ),
                           ),
-                        ),
+                          Container(
+                            constraints: BoxConstraints(maxHeight: widget.height),
+                            child: Material(
+                              color: Colors.transparent,
+                              child: InkWell(
+                                customBorder: CircleBorder(),
+                                onTap: widget.onHelp != null
+                                    ? (_animate ? _cancel : () {
+                                  _focusNode.unfocus();
+                                  _focusNode.canRequestFocus = false;
+                                  widget.onHelp();
+                                  _focusNode.canRequestFocus = true;
+                                }) : _cancel,
+                                // child: AnimatedOpacity(
+                                //   opacity: _animate ? 1.0 : 0,
+                                //   curve: Curves.easeIn,
+                                //   duration: Duration(milliseconds: _animate ? 1000 : 0),
+                                //   child: AnimatedContainer(
+                                //     duration: Duration(milliseconds: 200),
+                                //     width:
+                                //     _animate ? MediaQuery.of(context).size.width * .2 : 0,
+                                //     child: Container(
+                                //       color: Colors.transparent,
+                                //       child: widget.cancellationWidget,
+                                //     ),
+                                //   ),
+                                // ),
+                                child: AnimatedSwitcher(
+                                  duration: Duration(milliseconds: 200),
+                                  child: _suffixWidget,
+                                ),
+                              ),
+                            ),
+                          ),
+                        ]),
                         data: Theme.of(context).copyWith(
                           primaryColor: widget.iconActiveColor,
                         ),
@@ -397,25 +540,7 @@ class _SearchBarState<T> extends State<SearchBar<T>>
                     ),
                   ),
                 ),
-                GestureDetector(
-                  onTap: _cancel,
-                  child: AnimatedOpacity(
-                    opacity: _animate ? 1.0 : 0,
-                    curve: Curves.easeIn,
-                    duration: Duration(milliseconds: _animate ? 1000 : 0),
-                    child: AnimatedContainer(
-                      duration: Duration(milliseconds: 200),
-                      width:
-                          _animate ? MediaQuery.of(context).size.width * .2 : 0,
-                      child: Container(
-                        color: Colors.transparent,
-                        child: Center(
-                          child: widget.cancellationWidget,
-                        ),
-                      ),
-                    ),
-                  ),
-                ),
+                widget.trailingIcon != null ? widget.trailingIcon : Container(width: 0.0)
               ],
             ),
           ),
