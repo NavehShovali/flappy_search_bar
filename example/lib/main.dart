@@ -2,7 +2,7 @@ import 'dart:math';
 
 import 'package:flappy_search_bar/flappy_search_bar.dart';
 import 'package:flappy_search_bar/scaled_tile.dart';
-import 'package:flutter/material.dart';
+import 'package:flutter/material.dart' hide SearchBar;
 
 void main() => runApp(MyApp());
 
@@ -63,7 +63,7 @@ class _HomeState extends State<Home> {
           indexedScaledTileBuilder: (int index) => ScaledTile.count(1, index.isEven ? 2 : 1),
           header: Row(
             children: <Widget>[
-              RaisedButton(
+              ElevatedButton(
                 child: Text("sort"),
                 onPressed: () {
                   _searchBarController.sortList((Post a, Post b) {
@@ -71,13 +71,13 @@ class _HomeState extends State<Home> {
                   });
                 },
               ),
-              RaisedButton(
+              ElevatedButton(
                 child: Text("Desort"),
                 onPressed: () {
                   _searchBarController.removeSort();
                 },
               ),
-              RaisedButton(
+              ElevatedButton(
                 child: Text("Replay"),
                 onPressed: () {
                   isReplay = !isReplay;
